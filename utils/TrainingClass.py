@@ -17,14 +17,16 @@ class TrainingClass:
 
         train_tensorDict = load_data(args=self.args, is_train=True)
         self.train_qMap_tensor = train_tensorDict["MapHLCq"]
+        self.train_tMap_tensor = train_tensorDict["MapHLCt"]
         self.train_fccInput_tensor = train_tensorDict["fccInput"]
-        self.train_output_tensor = train_tensorDict["output_tensor"]
+        self.train_output_tensor = train_tensorDict["output"]
         self.train_weights = train_tensorDict["weights"]
 
         test_tensorDict = load_data(args=self.args, is_train=False)
         self.test_qMap_tensor = test_tensorDict["MapHLCq"]
+        self.test_tMap_tensor = test_tensorDict["MapHLCt"]
         self.test_fccInput_tensor = test_tensorDict["fccInput"]
-        self.test_output_tensor = test_tensorDict["output_tensor"]
+        self.test_output_tensor = test_tensorDict["output"]
         self.test_weights = test_tensorDict["weights"]
 
     def train(self):
@@ -46,8 +48,9 @@ class TrainingClass:
 
             # Forward pass
             output = self.net(
-                self.train_qMap_tensor[start_idx:end_idx],
-                self.train_fccInput_tensor[start_idx:end_idx],
+                qMap=self.train_qMap_tensor[start_idx:end_idx],
+                tMap=self.train_tMap_tensor[start_idx:end_idx],
+                fcc=self.train_fccInput_tensor[start_idx:end_idx],
             )
 
             loss = self.criterion(output, self.train_output_tensor[start_idx:end_idx])
@@ -86,7 +89,11 @@ class TrainingClass:
 
     def test(self):
         with torch.no_grad():
-            test_output = self.net(self.test_qMap_tensor, self.test_fccInput_tensor)
+            test_output = self.net(
+                qMap=self.test_qMap_tensor,
+                tMap=self.test_tMap_tensor,
+                fcc=self.test_fccInput_tensor,
+            )
             loss = self.criterion(
                 test_output[list(torch.isfinite(test_output))],
                 self.test_output_tensor[list(torch.isfinite(test_output))],
@@ -155,8 +162,13 @@ class TrainingClass:
                 f"{self.args.outputDir}/model/losses_accuracies.pth",
             )
 
+            # Access the current learning rate
+            current_lr = self.optimizer.param_groups[0]["lr"]
             # Stop training if the learning rate is too small
-            if self.scheduler.get_lr()[0] < 1e-9:
+            if current_lr < 1e-9:
+                print(
+                    f"Learning rate is too small: {current_lr:.2e}. Stopping training..."
+                )
                 break
 
         print("Saving the model...")

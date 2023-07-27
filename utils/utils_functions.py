@@ -123,13 +123,12 @@ def check_if_map_is_valid(Map):
 
 
 def check_if_tensor_is_valid(tensor):
-    if np.sum(np.logical_not(np.isfinite(tensor))):
-        print(tensor)
-        print(tensor[np.logical_not(np.isfinite(tensor))])
-        print(np.sum(np.logical_not(np.isfinite(tensor))))
-        print("Invalid tensor values")
-        exit()
-    return
+    if torch.sum(torch.logical_not(torch.isfinite(tensor))):
+        print(tensor[torch.logical_not(torch.isfinite(tensor))])
+        print(torch.sum(torch.logical_not(torch.isfinite(tensor))))
+        print("Invalid input tensor2")
+        sys.exit(1)
+        return
 
 
 def make_input_tensors(df):
@@ -145,11 +144,15 @@ def make_input_tensors(df):
     SumMapSLCq_tensor = torch.from_numpy(SumMapSLCq).view(-1, 1).float()
 
     # MapHLCt
-    # MapHLCt = np.array((df["MapHLCt"].values).tolist()).astype(float)
-    # check_if_map_is_valid(MapHLCt)
-    # # Normalize each time map
-    # for i in range(len(MapHLCt)):
-    #     MapHLCt[i] = MapHLCt[i] / np.sum(MapHLCt[i])
+    MapHLCt = np.array((df["MapHLCt"].values).tolist()).astype(float)
+    check_if_map_is_valid(MapHLCt)
+    # Normalize each time map if
+    for i in range(MapHLCt.shape[0]):
+        # print(MapHLCt[i])
+        # exit()
+        # print(np.amax(MapHLCt[i]))
+        MapHLCt[i] -= np.amin(MapHLCt[i]) + 0.001
+    MapHLCt_tensor = torch.from_numpy(MapHLCt).view(-1, 1, 10, 10, 2).float()
 
     log10_S125_tensor = (
         torch.tensor(df["Laputop3s3s_Log10_S125"].values).view(-1, 1).float()
@@ -174,6 +177,7 @@ def make_input_tensors(df):
 
     tensor_dict = {
         "MapHLCq": MapHLCq_tensor,
+        "MapHLCt": MapHLCt_tensor,
         "fccInput": fccInput_tensor,
         "output": output_tensor,
         "weights": weights,

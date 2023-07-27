@@ -45,7 +45,7 @@ class CNN(nn.Module):
 class FCNN(nn.Module):
     def __init__(self):
         super(FCNN, self).__init__()
-        self.fc1 = nn.Linear(1 + 4, 32 * 2)
+        self.fc1 = nn.Linear(2 + 4, 32 * 2)
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(32 * 2, 64 * 2)
         self.relu2 = nn.ReLU()
@@ -78,7 +78,9 @@ class Net(nn.Module):
         self.cnn = CNN()
         self.fcnn = FCNN()
 
-    def forward(self, x, y):
-        x = self.cnn(x)
-        x = self.fcnn(x, y)
+    def forward(self, qMap, tMap, fcc):
+        x = self.cnn(qMap)
+        y = self.cnn(tMap)
+        x = torch.cat((x, y), dim=1)
+        x = self.fcnn(x, fcc)
         return x
