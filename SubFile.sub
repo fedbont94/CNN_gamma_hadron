@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --job-name=cnnTraning0
+#SBATCH --output=/home/hk-project-pevradio/rn8463/log/log_cnnTraning0/%j.out
+#SBATCH --error=/home/hk-project-pevradio/rn8463/log/log_cnnTraning0/%j.err
+#SBATCH --nodes=1
+#SBATCH --time=1-00:00:00
+#SBATCH --mem=200gb
+#SBATCH --export=NONE
+#SBATCH --gres=gpu:4
+
+/home/hk-project-pevradio/rn8463/gamma_hadron/cnn_gamma_hadron.sh
