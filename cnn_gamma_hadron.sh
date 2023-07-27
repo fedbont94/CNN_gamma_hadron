@@ -10,7 +10,7 @@ $PYTHON $SCRIPT \
     --year 2012 \
     --energyStart 4.0 \
     --energyEnd 7.0 \
-    --batchSize 256 \
+    --batchSize 64 \
     --numEpochs 1
 
 

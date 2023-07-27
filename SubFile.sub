@@ -1,7 +1,10 @@
 #!/bin/bash
+
 #SBATCH --job-name=cnnTraning0
 #SBATCH --output=/home/hk-project-pevradio/rn8463/log/log_cnnTraning0/%j.out
 #SBATCH --error=/home/hk-project-pevradio/rn8463/log/log_cnnTraning0/%j.err
+#SBATCH --partition=accelerated
+#SBATCH --account=hk-project-pevradio
 #SBATCH --nodes=1
 #SBATCH --time=1-00:00:00
 #SBATCH --mem=200gb

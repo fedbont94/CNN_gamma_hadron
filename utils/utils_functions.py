@@ -47,10 +47,11 @@ def load_data(args, is_train=True):
         np.arange(args.energyStart, args.energyEnd, 0.1),
         decimals=1,
     )
-    # Initialize an empty dataframe
+    # Initialize an empty dataframe for both gammas and protons
     df = pd.DataFrame()
     # Load the data
     for primary in ["gamma", "proton"]:
+        # Initialize an empty dataframe for the current primary particle
         dataFrame = pd.DataFrame()
         print(f"Loading {primary} data...")
         for E in E_range:
@@ -99,18 +100,16 @@ def load_data(args, is_train=True):
         print(df["output"].values[np.logical_not(np.isfinite(df["output"].values))])
         print(np.sum(np.logical_not(np.isfinite(df["output"].values))))
         print("Invalid output values")
+        exit()
 
     # Shuffle the dataframe (if desired)
     df = df.sample(frac=1).reset_index(drop=True)
     return make_input_tensors(df)
 
 
-def make_input_tensors(df):
-    MapHLCq = np.array((df["MapHLCq"].values).tolist()).astype(float)
-
-    # Check for invalid values
-    if np.sum(np.logical_not(np.isfinite(MapHLCq))):
-        for i, el in enumerate(MapHLCq):
+def check_if_map_is_valid(Map):
+    if np.sum(np.logical_not(np.isfinite(Map))):
+        for i, el in enumerate(Map):
             if np.sum(np.logical_not(np.isfinite(el))):
                 print(el)
                 print(el[np.logical_not(np.isfinite(el))])
@@ -119,35 +118,44 @@ def make_input_tensors(df):
                 print("Index", i)
                 print(el.shape)
                 exit()
-                MapHLCq[np.logical_not(np.isfinite(MapHLCq))] = 0.0
+                Map[np.logical_not(np.isfinite(Map))] = 0.0
+    return
 
+
+def check_if_tensor_is_valid(tensor):
+    if np.sum(np.logical_not(np.isfinite(tensor))):
+        print(tensor)
+        print(tensor[np.logical_not(np.isfinite(tensor))])
+        print(np.sum(np.logical_not(np.isfinite(tensor))))
+        print("Invalid tensor values")
+        exit()
+    return
+
+
+def make_input_tensors(df):
+    # MapHLCq
+    MapHLCq = np.array((df["MapHLCq"].values).tolist()).astype(float)
+    check_if_map_is_valid(MapHLCq)
     MapHLCq_tensor = torch.from_numpy(MapHLCq).view(-1, 1, 10, 10, 2).float()
 
+    # MapSLCq
     MapSLCq = np.array((df["MapSLCq"].values).tolist()).astype(float)
-    MapSLCq = np.sum(MapSLCq, axis=(1, 2, 3))
-    SumMapSLCq_tensor = torch.from_numpy(MapSLCq).view(-1, 1).float()
+    check_if_map_is_valid(MapSLCq)
+    SumMapSLCq = np.sum(MapSLCq, axis=(1, 2, 3))
+    SumMapSLCq_tensor = torch.from_numpy(SumMapSLCq).view(-1, 1).float()
+
+    # MapHLCt
+    # MapHLCt = np.array((df["MapHLCt"].values).tolist()).astype(float)
+    # check_if_map_is_valid(MapHLCt)
+    # # Normalize each time map
+    # for i in range(len(MapHLCt)):
+    #     MapHLCt[i] = MapHLCt[i] / np.sum(MapHLCt[i])
 
     log10_S125_tensor = (
-        torch.tensor(
-            df["Laputop3s3s_Log10_S125"].values,
-        )
-        .view(-1, 1)
-        .float()
+        torch.tensor(df["Laputop3s3s_Log10_S125"].values).view(-1, 1).float()
     )
-    zenith_tensor = (
-        torch.tensor(
-            df["Laputop3s3s_zenith"].values,
-        )
-        .view(-1, 1)
-        .float()
-    )
-    beta_tensor = (
-        torch.tensor(
-            df["Laputop3s3s_beta"].values,
-        )
-        .view(-1, 1)
-        .float()
-    )
+    zenith_tensor = torch.tensor(df["Laputop3s3s_zenith"].values).view(-1, 1).float()
+    beta_tensor = torch.tensor(df["Laputop3s3s_beta"].values).view(-1, 1).float()
 
     fccInput_tensor = torch.cat(
         (
@@ -159,15 +167,18 @@ def make_input_tensors(df):
         dim=1,
     )
 
-    if torch.sum(torch.logical_not(torch.isfinite(fccInput_tensor))):
-        print(fccInput_tensor[torch.logical_not(torch.isfinite(fccInput_tensor))])
-        print(torch.sum(torch.logical_not(torch.isfinite(fccInput_tensor))))
-        print("Invalid input tensor2")
-        sys.exit(1)
+    check_if_tensor_is_valid(fccInput_tensor)
 
     output_tensor = torch.tensor(df["output"].values).view(-1, 1).float()
     weights = torch.tensor(df["weights"].values).view(-1, 1).float()
-    return MapHLCq_tensor, fccInput_tensor, output_tensor, weights
+
+    tensor_dict = {
+        "MapHLCq": MapHLCq_tensor,
+        "fccInput": fccInput_tensor,
+        "output": output_tensor,
+        "weights": weights,
+    }
+    return tensor_dict
 
 
 def plot_results(

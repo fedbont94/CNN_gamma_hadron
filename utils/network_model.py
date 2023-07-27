@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 
+# TODO Dropout? BatchNorm? Regularization?
 # Define your CNN architecture
 class CNN(nn.Module):
     def __init__(self):

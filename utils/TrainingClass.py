@@ -15,23 +15,21 @@ class TrainingClass:
         self.scheduler = scheduler
         self.args = args
 
-        (
-            self.train_input_tensor,
-            self.train_input_tensor2,
-            self.train_output_tensor,
-            self.train_weights,
-        ) = load_data(args=self.args, is_train=True)
+        train_tensorDict = load_data(args=self.args, is_train=True)
+        self.train_qMap_tensor = train_tensorDict["MapHLCq"]
+        self.train_fccInput_tensor = train_tensorDict["fccInput"]
+        self.train_output_tensor = train_tensorDict["output_tensor"]
+        self.train_weights = train_tensorDict["weights"]
 
-        (
-            self.test_input_tensor,
-            self.test_input_tensor2,
-            self.test_output_tensor,
-            self.test_weights,
-        ) = load_data(args=self.args, is_train=False)
+        test_tensorDict = load_data(args=self.args, is_train=False)
+        self.test_qMap_tensor = test_tensorDict["MapHLCq"]
+        self.test_fccInput_tensor = test_tensorDict["fccInput"]
+        self.test_output_tensor = test_tensorDict["output_tensor"]
+        self.test_weights = test_tensorDict["weights"]
 
     def train(self):
         self.net.train()  # Set the network in training mode
-        num_samples = self.train_input_tensor.size(0)
+        num_samples = self.train_qMap_tensor.size(0)
         num_batches = (num_samples + self.args.batchSize - 1) // self.args.batchSize
 
         total_loss = 0.0
@@ -48,8 +46,8 @@ class TrainingClass:
 
             # Forward pass
             output = self.net(
-                self.train_input_tensor[start_idx:end_idx],
-                self.train_input_tensor2[start_idx:end_idx],
+                self.train_qMap_tensor[start_idx:end_idx],
+                self.train_fccInput_tensor[start_idx:end_idx],
             )
 
             loss = self.criterion(output, self.train_output_tensor[start_idx:end_idx])
@@ -63,7 +61,7 @@ class TrainingClass:
 
             weighted_loss = torch.mean(
                 loss * self.train_weights[start_idx:end_idx]  # * 1e5
-            )  # TODO: Fix weights
+            )  # TODO: Fix weights only if not using Adam optimizer
 
             # Backward pass
             weighted_loss.backward()
@@ -88,7 +86,7 @@ class TrainingClass:
 
     def test(self):
         with torch.no_grad():
-            test_output = self.net(self.test_input_tensor, self.test_input_tensor2)
+            test_output = self.net(self.test_qMap_tensor, self.test_fccInput_tensor)
             loss = self.criterion(
                 test_output[list(torch.isfinite(test_output))],
                 self.test_output_tensor[list(torch.isfinite(test_output))],
@@ -124,7 +122,8 @@ class TrainingClass:
 
             # Testing
             test_loss, test_accuracy = self.test()
-            self.scheduler.step(test_loss)
+            # test_loss is used to reduce the learning rate, but train loss is used bc no validation set
+            self.scheduler.step(train_loss)
             test_losses.append(test_loss)
             test_accuracies.append(test_accuracy)
 
@@ -155,6 +154,10 @@ class TrainingClass:
                 },
                 f"{self.args.outputDir}/model/losses_accuracies.pth",
             )
+
+            # Stop training if the learning rate is too small
+            if self.scheduler.get_lr()[0] < 1e-9:
+                break
 
         print("Saving the model...")
         # Save the model

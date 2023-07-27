@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import os
 import time
 
 import torch
@@ -26,7 +25,9 @@ def mainTrainLoop(args):
     criterion = nn.BCELoss()
 
     # Define your optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(
+        net.parameters(), lr=0.001, weight_decay=1e-5
+    )  # TODO Maybe regularization loss?
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, "min", verbose=True
     )
