@@ -170,103 +170,16 @@ def make_input_tensors(df):
     return MapHLCq_tensor, fccInput_tensor, output_tensor, weights
 
 
-def train(
-    args,
-    net,
-    train_input_tensor,
-    train_input_tensor2,
-    train_output_tensor,
-    weights,
-    criterion,
-    optimizer,
-):
-    net.train()  # Set the network in training mode
-    num_samples = train_input_tensor.size(0)
-    num_batches = (num_samples + args.batchSize - 1) // args.batchSize
-
-    total_loss = 0.0
-    total_accuracy = 0.0
-
-    for batch_idx in range(num_batches):
-        start_idx = batch_idx * args.batchSize
-        end_idx = min(start_idx + args.batchSize, num_samples)
-
-        optimizer.zero_grad()
-
-        # Forward pass
-        output = net(
-            train_input_tensor[start_idx:end_idx],
-            train_input_tensor2[start_idx:end_idx],
-        )
-
-        loss = criterion(output, train_output_tensor[start_idx:end_idx])
-
-        accuracy = torch.mean(
-            ((output > 0.5).float() == train_output_tensor[start_idx:end_idx]).float()
-        )
-
-        weighted_loss = torch.mean(
-            loss * weights[start_idx:end_idx]  # * 1e5
-        )  # TODO: Fix weights
-
-        # Backward pass
-        weighted_loss.backward()
-        optimizer.step()
-
-        # Check if the job is running on an dev_accelerated partition
-        partition_name = os.environ.get("SLURM_JOB_PARTITION")
-        is_dev_accelerated_partition = "dev_ccelerated" in partition_name.lower()
-        if is_dev_accelerated_partition:
-            # Print progress
-            progress = (batch_idx + 1) / num_batches * 100
-            print(
-                f"Batch: [{batch_idx+1}/{num_batches}], Progress: {progress:.2f}%, Loss: {weighted_loss.item():.4f}",
-                end="\r",
-            )
-
-        total_loss += weighted_loss.item()
-        total_accuracy += accuracy.item()
-
-    avg_loss = total_loss / num_batches
-    avg_accuracy = total_accuracy / num_batches
-
-    return avg_loss, avg_accuracy
-
-
-def test(
-    net,
-    test_input_tensor,
-    test_input_tensor2,
-    test_output_tensor,
-    criterion,
-    weights,
-):
-    with torch.no_grad():
-        test_output = net(test_input_tensor, test_input_tensor2)
-        loss = criterion(
-            test_output[list(torch.isfinite(test_output))],
-            test_output_tensor[list(torch.isfinite(test_output))],
-        )
-
-        weighted_loss = torch.mean(
-            loss * weights[list(torch.isfinite(test_output))]
-        ).item()
-
-        accuracy = torch.mean(
-            ((test_output > 0.5).float() == test_output_tensor).float()
-        ).item()
-
-    return weighted_loss, accuracy
-
-
 def plot_results(
-    args,
-    train_losses,
-    test_losses,
-    train_accuracies,
-    test_accuracies,
+    training_results,
+    outputDir,
 ):
+    train_losses = training_results["train_losses"]
+    test_losses = training_results["test_losses"]
+    train_accuracies = training_results["train_accuracies"]
+    test_accuracies = training_results["test_accuracies"]
     num_epochs = len(train_losses)
+
     plt.figure(figsize=(10, 4))
 
     plt.subplot(1, 2, 1)
@@ -286,5 +199,5 @@ def plot_results(
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig(f"{args.outputDir}/plots/training_results.png")
+    plt.savefig(f"{outputDir}/plots/training_results.png")
     plt.close()
