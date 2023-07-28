@@ -8,9 +8,10 @@ import torch.nn as nn
 from utils.network_model import Net
 from utils.TrainingClass import TrainingClass
 from utils.utils_functions import (
-    plot_results,
     get_args,
     check_args,
+    format_duration,
+    plot_results,
 )
 
 
@@ -19,6 +20,7 @@ def mainTrainLoop(args):
     check_args(args)
 
     # Create an instance of the network
+    print("Creating an instance of the network...")
     net = Net()
 
     # Define your loss function
@@ -52,7 +54,7 @@ def mainTrainLoop(args):
 
     # Total training duration
     total_duration = time.time() - start_time
-    print(f"Total Training Duration: {total_duration:.2f} seconds")
+    print(f"Total Training Duration: {format_duration(int(total_duration))}")
     return
 
 

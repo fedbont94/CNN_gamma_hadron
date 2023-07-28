@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from utils.utils_functions import load_data, make_input_tensors
+from utils.utils_functions import load_data, make_input_tensors, format_duration
 
 
 class TrainingClass:
@@ -224,7 +224,7 @@ class TrainingClass:
                 + f"Val Accuracy: {val_accuracy:.4f}, "
                 + f"Test Accuracy: {test_accuracy:.4f}, "
                 #
-                + f"Epoch Duration: {epoch_duration:.2f} seconds"
+                + f"Epoch Duration: {format_duration(int(epoch_duration))}"
             )
             # Save the model
             torch.save(

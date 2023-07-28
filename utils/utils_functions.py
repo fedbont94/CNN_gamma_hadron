@@ -37,6 +37,15 @@ def check_args(args):
     return
 
 
+def format_duration(seconds):
+    """Format a duration given in seconds to a string D-HH:MM:SS"""
+    days = seconds // 86400
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{days}-{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
 def load_data(args, is_train=True):
     if is_train:
         print("Loading training data...")
