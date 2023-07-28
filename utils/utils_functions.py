@@ -104,31 +104,7 @@ def load_data(args, is_train=True):
 
     # Shuffle the dataframe (if desired)
     df = df.sample(frac=1).reset_index(drop=True)
-    return make_input_tensors(df)
-
-
-def check_if_map_is_valid(Map):
-    if np.sum(np.logical_not(np.isfinite(Map))):
-        for i, el in enumerate(Map):
-            if np.sum(np.logical_not(np.isfinite(el))):
-                print(el)
-                print(el[np.logical_not(np.isfinite(el))])
-                print(np.sum(np.logical_not(np.isfinite(el))))
-                print("Invalid MAP values")
-                print("Index", i)
-                print(el.shape)
-                exit()
-                Map[np.logical_not(np.isfinite(Map))] = 0.0
-    return
-
-
-def check_if_tensor_is_valid(tensor):
-    if torch.sum(torch.logical_not(torch.isfinite(tensor))):
-        print(tensor[torch.logical_not(torch.isfinite(tensor))])
-        print(torch.sum(torch.logical_not(torch.isfinite(tensor))))
-        print("Invalid input tensor2")
-        sys.exit(1)
-        return
+    return df
 
 
 def make_input_tensors(df):
@@ -185,13 +161,40 @@ def make_input_tensors(df):
     return tensor_dict
 
 
+def check_if_map_is_valid(Map):
+    if np.sum(np.logical_not(np.isfinite(Map))):
+        for i, el in enumerate(Map):
+            if np.sum(np.logical_not(np.isfinite(el))):
+                print(el)
+                print(el[np.logical_not(np.isfinite(el))])
+                print(np.sum(np.logical_not(np.isfinite(el))))
+                print("Invalid MAP values")
+                print("Index", i)
+                print(el.shape)
+                exit()
+                Map[np.logical_not(np.isfinite(Map))] = 0.0
+    return
+
+
+def check_if_tensor_is_valid(tensor):
+    if torch.sum(torch.logical_not(torch.isfinite(tensor))):
+        print(tensor[torch.logical_not(torch.isfinite(tensor))])
+        print(torch.sum(torch.logical_not(torch.isfinite(tensor))))
+        print("Invalid input tensor2")
+        sys.exit(1)
+        return
+
+
 def plot_results(
     training_results,
     outputDir,
 ):
     train_losses = training_results["train_losses"]
+    val_losses = training_results["val_losses"]
     test_losses = training_results["test_losses"]
+    #
     train_accuracies = training_results["train_accuracies"]
+    val_accuracies = training_results["val_accuracies"]
     test_accuracies = training_results["test_accuracies"]
     num_epochs = len(train_losses)
 
@@ -199,6 +202,7 @@ def plot_results(
 
     plt.subplot(1, 2, 1)
     plt.plot(range(1, num_epochs + 1), train_losses, label="Train Loss")
+    plt.plot(range(1, num_epochs + 1), val_losses, label="Validation Loss")
     plt.plot(range(1, num_epochs + 1), test_losses, label="Test Loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
@@ -207,6 +211,7 @@ def plot_results(
 
     plt.subplot(1, 2, 2)
     plt.plot(range(1, num_epochs + 1), train_accuracies, label="Train Accuracy")
+    plt.plot(range(1, num_epochs + 1), val_accuracies, label="Validation Accuracy")
     plt.plot(range(1, num_epochs + 1), test_accuracies, label="Test Accuracy")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
