@@ -1,0 +1,10 @@
+These are personal notes that I use to keep truck of which networks I am training and with wich settings. 
+
+-------------------------------------------------------------------
+folder: /hkfs/work/workspace/scratch/rn8463-gamma_hadron/version0/
+
+This is worked fine. There was a small bug in the SLC time maps but overall accuracy was above 0.81
+I pushed this into github 28.07.
+It used both time maps hlc and SLC
+
+-------------------------------------------------------------------

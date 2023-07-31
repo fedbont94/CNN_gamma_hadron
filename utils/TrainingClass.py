@@ -42,15 +42,15 @@ class TrainingClass:
         self.test_output_tensor = test_tensorDict["output"]
         self.test_weights = test_tensorDict["weights"]
 
+        # Check if the job is running on an dev_accelerated partition
+        self.partition_name = str(os.environ.get("SLURM_JOB_PARTITION"))
+
     def train(self, input_tensor):
         self.net.train()  # Set the network in training mode
         num_batches = len(input_tensor)
 
         total_loss = 0.0
         total_accuracy = 0.0
-
-        # Check if the job is running on an dev_accelerated partition
-        partition_name = os.environ.get("SLURM_JOB_PARTITION")
 
         for batch_idx, (qMap, tMap, fccInput, output_tensor, weights) in enumerate(
             input_tensor
@@ -80,7 +80,7 @@ class TrainingClass:
             self.optimizer.step()
 
             # Show progress if the partition is dev_accelerated
-            if str(partition_name) == "dev_accelerated":
+            if self.partition_name == "dev_accelerated":
                 # Print progress
                 progress = (batch_idx + 1) / num_batches * 100
                 print(

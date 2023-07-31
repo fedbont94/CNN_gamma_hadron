@@ -55,7 +55,7 @@ class CNN(nn.Module):
 class FCNN(nn.Module):
     def __init__(self):
         super(FCNN, self).__init__()
-        self.fc1 = nn.Linear(2 + 4, 32 * 2)
+        self.fc1 = nn.Linear(2 + 5, 32 * 2)
         self.relu1 = nn.ReLU()
         self.bn1 = nn.BatchNorm1d(32 * 2)
         self.fc2 = nn.Linear(32 * 2, 64 * 2)

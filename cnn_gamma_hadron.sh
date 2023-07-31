@@ -22,3 +22,12 @@ $PYTHON $SCRIPT \
     # --energyEnd 7.0 \
     # --batchSize 64 \
     # --numEpochs 100
+
+
+    # --inputDir "/hkfs/work/workspace/scratch/rn8463-lv3_Simulations/" \
+    # --outputDir "/hkfs/home/project/hk-project-pevradio/rn8463/gamma_hadron/" \
+    # --year 2012 \
+    # --energyStart 4.0 \
+    # --energyEnd 7.0 \
+    # --batchSize 64 \
+    # --numEpochs 2
