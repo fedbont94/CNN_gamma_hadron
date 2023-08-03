@@ -6,5 +6,25 @@ folder: /hkfs/work/workspace/scratch/rn8463-gamma_hadron/version0/
 This is worked fine. There was a small bug in the SLC time maps but overall accuracy was above 0.81
 I pushed this into github 28.07.
 It used both time maps hlc and SLC
+There is a bug. The network was training during the testing. It was not set to eval.
 
 -------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version1/
+
+This corrected the above bug. For the rest it was unchanged. It also includes the time range of the event.
+Time end - time start including the slc and hlc hits. 
+circa 175 epochs. Accuracy little more then 0.81. Loss around 2.0. 
+The beggining of the training was somehow strange. 
+It took a long time to train for some reson. I would not use this for any purposes.
+There is a bug. The network was training during the testing. It was not set to eval.
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version2/
+
+Same as above it does not include the time difference just the improved time maps 
+Well trained however, 
+There is a bug. The network was training during the testing. It was not set to eval.
+It will be retrained. 
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version3/

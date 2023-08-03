@@ -145,15 +145,15 @@ def make_input_tensors(df):
             MapHLCt[i][MapHLCt[i] != 0.0] -= (
                 np.amin(MapHLCt[i][MapHLCt[i] != 0.0]) + 1.0
             )
-        # Get the minimum time and the maximum time of HLC and SLC time maps
-        mapTime = np.concatenate((MapHLCt[i], MapSLCt[i]), axis=0)
-        if np.sum(mapTime[mapTime != 0.0]):
-            maxTime = np.amax(mapTime[mapTime != 0.0])
-            minTime = np.amin(mapTime[mapTime != 0.0])
-            # Set the ArrayTime to the time interval
-            ArrayTime[i] = maxTime - minTime
+    #     # Get the minimum time and the maximum time of HLC and SLC time maps
+    #     mapTime = np.concatenate((MapHLCt[i], MapSLCt[i]), axis=0)
+    #     if np.sum(mapTime[mapTime != 0.0]):
+    #         maxTime = np.amax(mapTime[mapTime != 0.0])
+    #         minTime = np.amin(mapTime[mapTime != 0.0])
+    #         # Set the ArrayTime to the time interval
+    #         ArrayTime[i] = maxTime - minTime
 
-    ArrayTime_tensor = torch.from_numpy(ArrayTime).view(-1, 1).float()
+    # ArrayTime_tensor = torch.from_numpy(ArrayTime).view(-1, 1).float()
 
     MapHLCt_tensor = torch.from_numpy(MapHLCt).view(-1, 1, 10, 10, 2).float()
 
@@ -169,7 +169,7 @@ def make_input_tensors(df):
             zenith_tensor,
             beta_tensor,
             SumMapSLCq_tensor,
-            ArrayTime_tensor,
+            # ArrayTime_tensor,
         ),
         dim=1,
     )

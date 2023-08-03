@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import time
 import torch
 import numpy as np
@@ -9,7 +10,7 @@ import torch.utils.data as data
 from utils.utils_functions import load_data, make_input_tensors, format_duration
 
 
-class TrainingClass:
+class TrainTestClass:
     def __init__(
         self,
         args,
@@ -17,8 +18,7 @@ class TrainingClass:
         criterion,
         optimizer,
         scheduler,
-        # train_tensorDict,
-        # test_tensorDict,
+        loadData=True,
     ):
         self.net = net
         self.criterion = criterion
@@ -26,21 +26,22 @@ class TrainingClass:
         self.scheduler = scheduler
         self.args = args
 
-        train_df = load_data(args=self.args, is_train=True)
-        train_tensorDict = make_input_tensors(train_df)
-        self.train_qMap_tensor = train_tensorDict["MapHLCq"]
-        self.train_tMap_tensor = train_tensorDict["MapHLCt"]
-        self.train_fccInput_tensor = train_tensorDict["fccInput"]
-        self.train_output_tensor = train_tensorDict["output"]
-        self.train_weights = train_tensorDict["weights"]
+        if loadData:
+            train_df = load_data(args=self.args, is_train=True)
+            train_tensorDict = make_input_tensors(train_df)
+            self.train_qMap_tensor = train_tensorDict["MapHLCq"]
+            self.train_tMap_tensor = train_tensorDict["MapHLCt"]
+            self.train_fccInput_tensor = train_tensorDict["fccInput"]
+            self.train_output_tensor = train_tensorDict["output"]
+            self.train_weights = train_tensorDict["weights"]
 
-        test_df = load_data(args=self.args, is_train=False)
-        test_tensorDict = make_input_tensors(test_df)
-        self.test_qMap_tensor = test_tensorDict["MapHLCq"]
-        self.test_tMap_tensor = test_tensorDict["MapHLCt"]
-        self.test_fccInput_tensor = test_tensorDict["fccInput"]
-        self.test_output_tensor = test_tensorDict["output"]
-        self.test_weights = test_tensorDict["weights"]
+            test_df = load_data(args=self.args, is_train=False)
+            test_tensorDict = make_input_tensors(test_df)
+            self.test_qMap_tensor = test_tensorDict["MapHLCq"]
+            self.test_tMap_tensor = test_tensorDict["MapHLCt"]
+            self.test_fccInput_tensor = test_tensorDict["fccInput"]
+            self.test_output_tensor = test_tensorDict["output"]
+            self.test_weights = test_tensorDict["weights"]
 
         # Check if the job is running on an dev_accelerated partition
         self.partition_name = str(os.environ.get("SLURM_JOB_PARTITION"))
@@ -97,6 +98,7 @@ class TrainingClass:
         return avg_loss, avg_accuracy
 
     def test(self, input_tensor):
+        self.net.eval()  # Set the network in evaluation mode
         # Check the length of the input_tensor (DataLoader)
         if len(input_tensor) != 1:
             raise ValueError(
@@ -121,7 +123,7 @@ class TrainingClass:
                 ((output > 0.5).float() == output_tensor).float()
             ).item()
 
-        return weighted_loss, accuracy
+        return weighted_loss, accuracy, output
 
     def train_loop(self):
         print("Starting the training loop...")
@@ -137,6 +139,8 @@ class TrainingClass:
 
         # Training loop
         for epoch in range(self.args.numEpochs):
+            sys.stdout.flush()  # Flush the output after the loop
+
             # Start time of the current epoch
             epoch_start_time = time.time()
 
@@ -198,14 +202,14 @@ class TrainingClass:
             train_accuracies.append(train_accuracy)
 
             # Validation
-            val_loss, val_accuracy = self.test(val_loader)
+            val_loss, val_accuracy, val_output = self.test(val_loader)
             # val_loss is used to reduce the learning rate
             self.scheduler.step(val_loss)
             val_losses.append(val_loss)
             val_accuracies.append(val_accuracy)
 
             # Testing
-            test_loss, test_accuracy = self.test(test_loader)
+            test_loss, test_accuracy, test_output = self.test(test_loader)
             test_losses.append(test_loss)
             test_accuracies.append(test_accuracy)
 

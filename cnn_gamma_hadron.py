@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 
 import time
+import pickle
 
 import torch
 import torch.nn as nn
 
 from utils.network_model import Net
-from utils.TrainingClass import TrainingClass
+from utils.TrainTestClass import TrainTestClass
 from utils.utils_functions import (
     get_args,
     check_args,
@@ -33,10 +34,24 @@ def mainTrainLoop(args):
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, "min", verbose=True
     )
+    # save the network with pickle
+    with open(f"{args.outputDir}/model/classModel.pkl", "wb") as f:
+        pickle.dump(net, f)
+    # save criterion, optimizer, scheduler in a single dictionary
+    with open(f"{args.outputDir}/model/variablesModel.pkl", "wb") as f:
+        pickle.dump(
+            {
+                "criterion": criterion,
+                "optimizer": optimizer,
+                "scheduler": scheduler,
+            },
+            f,
+        )
+
     # Timing variables
     start_time = time.time()
 
-    trainer = TrainingClass(
+    trainer = TrainTestClass(
         args=args,
         net=net,
         criterion=criterion,

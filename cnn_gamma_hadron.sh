@@ -6,12 +6,12 @@ SCRIPT=/hkfs/home/project/hk-project-pevradio/rn8463/gamma_hadron/cnn_gamma_hadr
 # TODO Remember to change the output directory!! 
 $PYTHON $SCRIPT \
     --inputDir "/hkfs/work/workspace/scratch/rn8463-lv3_Simulations/" \
-    --outputDir "/hkfs/home/project/hk-project-pevradio/rn8463/gamma_hadron/" \
+    --outputDir "/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version3/" \
     --year 2012 \
     --energyStart 4.0 \
     --energyEnd 7.0 \
     --batchSize 64 \
-    --numEpochs 2
+    --numEpochs 1000
 
 # --outputDir "/hkfs/work/workspace/scratch/rn8463-gamma_hadron/dummy/" \
 
@@ -21,7 +21,7 @@ $PYTHON $SCRIPT \
     # --energyStart 4.0 \
     # --energyEnd 7.0 \
     # --batchSize 64 \
-    # --numEpochs 100
+    # --numEpochs 1000
 
 
     # --inputDir "/hkfs/work/workspace/scratch/rn8463-lv3_Simulations/" \
