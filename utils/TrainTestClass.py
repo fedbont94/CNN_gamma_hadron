@@ -7,7 +7,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from utils.utils_functions import load_data, make_input_tensors, format_duration
+from utils.utils_functions import load_simulations, make_input_tensors, format_duration
 
 
 class TrainTestClass:
@@ -27,7 +27,7 @@ class TrainTestClass:
         self.args = args
 
         if loadData:
-            train_df = load_data(args=self.args, is_train=True)
+            train_df = load_simulations(args=self.args, is_train=True)
             train_tensorDict = make_input_tensors(train_df)
             self.train_qMap_tensor = train_tensorDict["MapHLCq"]
             self.train_tMap_tensor = train_tensorDict["MapHLCt"]
@@ -35,7 +35,7 @@ class TrainTestClass:
             self.train_output_tensor = train_tensorDict["output"]
             self.train_weights = train_tensorDict["weights"]
 
-            test_df = load_data(args=self.args, is_train=False)
+            test_df = load_simulations(args=self.args, is_train=False)
             test_tensorDict = make_input_tensors(test_df)
             self.test_qMap_tensor = test_tensorDict["MapHLCq"]
             self.test_tMap_tensor = test_tensorDict["MapHLCt"]
@@ -178,7 +178,7 @@ class TrainTestClass:
                     self.train_output_tensor,
                     self.train_weights,
                 ),
-                batch_size=len(val_indices),
+                batch_size=len(val_indices),  # self.args.batchSize,  #
                 sampler=val_sampler,
             )
 
@@ -192,7 +192,7 @@ class TrainTestClass:
                     self.test_weights,
                 ),
                 # Set batch size to the size of the entire test dataset
-                batch_size=self.test_qMap_tensor.size(0),
+                batch_size=self.test_qMap_tensor.size(0),  # self.args.batchSize,  #
                 shuffle=False,  # No shuffling
             )
 
@@ -201,6 +201,11 @@ class TrainTestClass:
             train_losses.append(train_loss)
             train_accuracies.append(train_accuracy)
 
+            # print(
+            #     f"\nTraining lasted {format_duration(int(time.time() - epoch_start_time))}"
+            # )
+            time_checkpoint = time.time()
+
             # Validation
             val_loss, val_accuracy, val_output = self.test(val_loader)
             # val_loss is used to reduce the learning rate
@@ -208,10 +213,19 @@ class TrainTestClass:
             val_losses.append(val_loss)
             val_accuracies.append(val_accuracy)
 
+            # print(
+            #     f"\nValidation lasted {format_duration(int(time.time() - time_checkpoint))}"
+            # )
+            time_checkpoint = time.time()
+
             # Testing
             test_loss, test_accuracy, test_output = self.test(test_loader)
             test_losses.append(test_loss)
             test_accuracies.append(test_accuracy)
+
+            # print(
+            #     f"\nTesting lasted {format_duration(int(time.time() - time_checkpoint))}"
+            # )
 
             # Calculate the duration of the current epoch
             epoch_duration = time.time() - epoch_start_time

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#SBATCH --job-name=evalData
+#SBATCH --output=/hkfs/work/workspace/scratch/rn8463-data_2012/logs/%j.out
+#SBATCH --error=/hkfs/work/workspace/scratch/rn8463-data_2012/logs/%j.err
+#SBATCH --partition=cpuonly
+#SBATCH --account=hk-project-pevradio
+#SBATCH --nodes=1
+#SBATCH --time=0-05:00:00
+#SBATCH --mem=200gb
+#SBATCH --export=NONE
+######SBATCH --gres=gpu:4
+
+$HOME/cvmfsexec/cvmfsexec icecube.opensciencegrid.org -- /bin/bash /home/hk-project-pevradio/rn8463/gamma_hadron/evaluate_data.sh

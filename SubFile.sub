@@ -7,7 +7,7 @@
 #SBATCH --account=hk-project-pevradio
 #SBATCH --nodes=1
 #SBATCH --time=2-00:00:00
-#SBATCH --mem=70gb
+#SBATCH --mem=50gb
 #SBATCH --export=NONE
 #SBATCH --gres=gpu:4
 

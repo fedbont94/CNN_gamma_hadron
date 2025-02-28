@@ -28,3 +28,56 @@ It will be retrained.
 
 -------------------------------------------------------------------
 /hkfs/work/workspace/scratch/rn8463-gamma_hadron/version3/
+
+It got super slow for some reason Stopped.
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version4/
+
+This is the improved version2 without the but and was trained with 100gb of memory.
+This showed a better train. I did not see any bug so far. 
+circa 400+ epochs. Accuracy little more then 0.82+. Loss around between 1.9 and 2.0. 
+Best so far.
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version5/
+train 200+ epochs 100gb oif memory.
+Events weighted with -3 gamma index. 
+0.82+ accuracy
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version6/
+train 200+ epochs 200gb oif memory.
+Events weighted with -3 gamma index. 
+0.82+ accuracy
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version7/
+train 200+ epochs 200gb oif memory.
+Events 5.0 to 6.0 weighted with -3 gamma index. 
+Probably spcetal index ALL above not correct.
+
+---------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version8/
+train 70+ epochs 200gb oif memory.
+Events 4.0 to 7.0 weighted with -3 gamma index. 
+Probably spcetal with better index, corrected.
+No major results seen so far.
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version9/
+train 70+ epochs 200gb oif memory.
+Events 5.0 to 7.0 weighted with -3 gamma index. 
+Probably spcetal with better index, corrected.
+No major results seen so far. Longer training probably 
+
+-------------------------------------------------------------------
+/hkfs/work/workspace/scratch/rn8463-gamma_hadron/version10/
+train 70+ epochs 200gb oif memory.
+Events 5.0 to 6.5 weighted with -3 gamma index. 
+Probably spcetal with better index, corrected.
+No major results seen so far.
+
+
+
+
